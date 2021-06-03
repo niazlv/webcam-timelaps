@@ -6,12 +6,13 @@ from datetime import datetime
 
 from config import *
 
-url="http://"+login+":"+"passwd"+"@"+ip+"/axis-cgi/jpg/image.cgi?"+resolution+"&"+compression
-
+url="http://"+login+":"+passwd+"@"+ip+"/axis-cgi/jpg/image.cgi?"+resolution+"&"+compression
 urls="'"
 urls+=url
 urls+="'"
 print("Generated url:",url)
+print('delay by 5 second and starting')
+time.sleep(5)
 def log(str):
     print(str)
 
