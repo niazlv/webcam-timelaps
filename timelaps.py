@@ -11,7 +11,7 @@ url="http://"+login+":"+"passwd"+"@"+ip+"/axis-cgi/jpg/image.cgi?"+resolution+"&
 urls="'"
 urls+=url
 urls+="'"
-
+print("Generated url:",url)
 def log(str):
     print(str)
 
