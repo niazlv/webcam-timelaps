@@ -6,7 +6,7 @@ from datetime import datetime
 
 from config import *
 
-url="http://"+login+":"+passwd+"@"+ip+"/axis-cgi/jpg/image.cgi?"+resolution+"&"+compression
+url="http://"+login+":"+passwd+"@"+ip+"/axis-cgi/jpg/image.cgi?"+resolution+"&compression="+compression
 urls="'"
 urls+=url
 urls+="'"
