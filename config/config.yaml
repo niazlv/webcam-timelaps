@@ -1,0 +1,15 @@
+ip: "your_camera_ip"
+username: "your_camera_username"
+password: "your_camera_password"
+delay: 5
+storage:
+  type: "local"
+  directory: "/path/to/local/directory"
+  ftp:
+    server: "ftp.server.com:21"
+    username: "ftp_user"
+    password: "ftp_password"
+telegram:
+  bot_token: "your_telegram_bot_token"
+  chat_id: "your_telegram_chat_id"
+video_output_dir: "/path/to/video/output"
