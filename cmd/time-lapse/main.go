@@ -8,6 +8,7 @@ import (
 	"niazlv/time-lapse/internal/processing"
 	"niazlv/time-lapse/internal/storage"
 	"niazlv/time-lapse/internal/telegram"
+	"os/exec"
 	"path/filepath"
 	"time"
 )
@@ -145,16 +146,23 @@ func captureAndSaveImage(cam camera.Camera, store storage.Storage) error {
 		log.Printf("Directory %s created\n", dirPath)
 	}
 
-	// Захват изображения
-	img, err := cam.CaptureImage()
-	if err != nil {
-		return fmt.Errorf("failed to capture image: %w", err)
-	}
+	// // Захват изображения
+	// img, err := cam.CaptureImage()
+	// if err != nil {
+	// 	return fmt.Errorf("failed to capture image: %w", err)
+	// }
 
-	// Сохранение изображения
-	err = store.SaveFile(filePath, img)
+	// // Сохранение изображения
+	// err = store.SaveFile(filePath, img)
+	// if err != nil {
+	// 	return fmt.Errorf("failed to save image: %w", err)
+	// }
+
+	// Захват и сразу же сохранение(в ручном режиме, ибо закалупался)
+	cmd := exec.Command("fswebcam", "-r", "640x480", filepath.Join("/media/pi/SomeFLASH/timelapse/", filePath))
+	output, err := cmd.CombinedOutput()
 	if err != nil {
-		return fmt.Errorf("failed to save image: %w", err)
+		return fmt.Errorf("failed to capture image: %w\nOutput: %s", err, string(output))
 	}
 
 	log.Printf("Image saved to %s\n", filePath)
