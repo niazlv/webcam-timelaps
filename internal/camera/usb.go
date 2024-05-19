@@ -2,7 +2,7 @@ package camera
 
 import (
 	"fmt"
-	"io/ioutil"
+	"os"
 	"os/exec"
 	"time"
 )
@@ -13,7 +13,7 @@ type USBCam struct {
 }
 
 func (c *USBCam) CaptureImage() ([]byte, error) {
-	tempFile, err := ioutil.TempFile("", "usb_cam_*.jpg")
+	tempFile, err := os.CreateTemp("", "usb_cam_*.jpg")
 	if err != nil {
 		return nil, fmt.Errorf("failed to create temp file: %w", err)
 	}
@@ -34,7 +34,7 @@ func (c *USBCam) CaptureImage() ([]byte, error) {
 		}
 
 		if fileInfo.Size() > 0 {
-			imgData, err = ioutil.ReadFile(tempFile.Name())
+			imgData, err = os.ReadFile(tempFile.Name())
 			if err != nil {
 				return nil, fmt.Errorf("failed to read captured image: %w", err)
 			}
