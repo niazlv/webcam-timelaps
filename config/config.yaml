@@ -1,6 +1,10 @@
 ip: "your_camera_ip"
 username: "your_camera_username"
 password: "your_camera_password"
+usb_device: "/dev/video0" 
+axis:
+  resolution: "1280x1024"
+  compression: 50
 delay: 5
 storage:
   type: "local"

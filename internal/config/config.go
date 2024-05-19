@@ -11,6 +11,7 @@ type Config struct {
 	IP             string
 	Username       string
 	Password       string
+	CameraType     string `mapstructure:"camera_type"`
 	Delay          time.Duration
 	Storage        StorageConfig
 	Telegram       TelegramConfig

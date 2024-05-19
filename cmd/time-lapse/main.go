@@ -27,7 +27,7 @@ func main() {
 	fmt.Println(delay)
 
 	// Пример использования IP камеры D-Link и локального хранилища
-	cam = &camera.USBCam{Device: 0} //camera.IPCamAXIS{IP: cfg.IP, Username: cfg.Username, Password: cfg.Password, Resolution: cfg.Axis.Resolution, Compression: cfg.Axis.Compression}
+	cam = &camera.USBCam{Device: cfg.CameraType} //camera.IPCamAXIS{IP: cfg.IP, Username: cfg.Username, Password: cfg.Password, Resolution: cfg.Axis.Resolution, Compression: cfg.Axis.Compression}
 	store = &storage.LocalStorage{Directory: cfg.Storage.Directory}
 	msg = &telegram.TelegramBot{BotToken: cfg.Telegram.BotToken, ChatID: cfg.Telegram.ChatID, Storage: store}
 	proc := &processing.Processing{Storage: store, OutputDir: cfg.VideoOutputDir}

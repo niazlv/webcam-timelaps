@@ -2,41 +2,31 @@ package camera
 
 import (
 	"fmt"
-
-	"gocv.io/x/gocv"
+	"io/ioutil"
+	"os/exec"
 )
 
 type USBCam struct {
-	Device int
+	Device string
 }
 
 func (c *USBCam) CaptureImage() ([]byte, error) {
-	// Открыть устройство камеры
-	webcam, err := gocv.OpenVideoCapture(c.Device)
+	tempFile, err := ioutil.TempFile("", "usb_cam_*.jpg")
 	if err != nil {
-		return nil, fmt.Errorf("error opening video capture device: %v", c.Device)
+		return nil, fmt.Errorf("failed to create temp file: %w", err)
 	}
-	defer webcam.Close()
+	defer tempFile.Close()
 
-	// Создать матрицу для хранения изображения
-	img := gocv.NewMat()
-	defer img.Close()
-
-	// Захватить изображение
-	if ok := webcam.Read(&img); !ok {
-		return nil, fmt.Errorf("cannot read from device %v", c.Device)
+	// Использование ffmpeg для захвата изображения с USB камеры
+	cmd := exec.Command("ffmpeg", "-f", "video4linux2", "-i", c.Device, "-vframes", "1", tempFile.Name())
+	if err := cmd.Run(); err != nil {
+		return nil, fmt.Errorf("failed to capture image: %w", err)
 	}
 
-	// Проверить, что изображение действительно захвачено
-	if img.Empty() {
-		return nil, fmt.Errorf("image is empty")
-	}
-
-	// Преобразовать изображение в формат []byte
-	buf, err := gocv.IMEncode(".jpg", img)
+	imgData, err := ioutil.ReadFile(tempFile.Name())
 	if err != nil {
-		return nil, fmt.Errorf("error encoding image: %v", err)
+		return nil, fmt.Errorf("failed to read captured image: %w", err)
 	}
 
-	return buf.GetBytes(), nil
+	return imgData, nil
 }
