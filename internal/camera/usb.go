@@ -2,8 +2,8 @@ package camera
 
 import (
 	"fmt"
-
-	"github.com/blackjack/webcam"
+	"io/ioutil"
+	"os/exec"
 )
 
 type USBCam struct {
@@ -11,45 +11,23 @@ type USBCam struct {
 }
 
 func (c *USBCam) CaptureImage() ([]byte, error) {
-	cam, err := webcam.Open(c.Device)
+	tempFile, err := ioutil.TempFile("", "usb_cam_*.jpg")
 	if err != nil {
-		return nil, fmt.Errorf("failed to open webcam: %w", err)
+		return nil, fmt.Errorf("failed to create temp file: %w", err)
 	}
-	defer cam.Close()
+	defer tempFile.Close()
 
-	formatDesc := cam.GetSupportedFormats()
-	var format webcam.PixelFormat
-	for f := range formatDesc {
-		format = f
-		break
-	}
-
-	width, height := uint32(640), uint32(480)
-	if _, _, _, err = cam.SetImageFormat(format, width, height); err != nil {
-		return nil, fmt.Errorf("failed to set image format: %w", err)
+	// Использование fswebcam для захвата изображения с USB камеры
+	cmd := exec.Command("fswebcam", "-d", c.Device, "--no-banner", tempFile.Name())
+	output, err := cmd.CombinedOutput()
+	if err != nil {
+		return nil, fmt.Errorf("failed to capture image: %w\nOutput: %s", err, string(output))
 	}
 
-	if err := cam.StartStreaming(); err != nil {
-		return nil, fmt.Errorf("failed to start streaming: %w", err)
+	imgData, err := ioutil.ReadFile(tempFile.Name())
+	if err != nil {
+		return nil, fmt.Errorf("failed to read captured image: %w", err)
 	}
-	defer cam.StopStreaming()
 
-	timeout := uint32(5)
-	for {
-		err = cam.WaitForFrame(timeout)
-		switch err.(type) {
-		case nil:
-			frame, err := cam.ReadFrame()
-			if len(frame) != 0 {
-				return frame, nil
-			}
-			if err != nil {
-				return nil, fmt.Errorf("failed to read frame: %w", err)
-			}
-		case *webcam.Timeout:
-			continue
-		default:
-			return nil, fmt.Errorf("error while waiting for frame: %w", err)
-		}
-	}
+	return imgData, nil
 }
