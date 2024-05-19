@@ -14,7 +14,13 @@ type Config struct {
 	Delay          time.Duration
 	Storage        StorageConfig
 	Telegram       TelegramConfig
+	Axis           AxisConfig
 	VideoOutputDir string `mapstructure:"video_output_dir"`
+}
+
+type AxisConfig struct {
+	Resolution  string
+	Compression int
 }
 
 type StorageConfig struct {
