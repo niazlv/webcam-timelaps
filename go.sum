@@ -1,3 +1,5 @@
+github.com/blackjack/webcam v0.6.1 h1:K0T6Q0zto23U99gNAa5q/hFoye6uGcKr2aE6hFoxVoE=
+github.com/blackjack/webcam v0.6.1/go.mod h1:zs+RkUZzqpFPHPiwBZ6U5B34ZXXe9i+SiHLKnnukJuI=
 github.com/davecgh/go-spew v1.1.0/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
 github.com/davecgh/go-spew v1.1.1/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
 github.com/davecgh/go-spew v1.1.2-0.20180830191138-d8f796af33cc h1:U9qPSI2PIWSS1VwoXQT9A3Wy9MM3WgvqSxFWenqJduM=

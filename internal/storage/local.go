@@ -36,7 +36,8 @@ func (s *LocalStorage) IsExist(path string) bool {
 }
 
 func (s *LocalStorage) CreateDir(path string) error {
-	return os.Mkdir(path, os.ModePerm)
+	fullpath := filepath.Join(s.Directory, path)
+	return os.Mkdir(fullpath, os.ModePerm)
 }
 func (s *LocalStorage) Remove(path string) error {
 	return os.Remove(path)
