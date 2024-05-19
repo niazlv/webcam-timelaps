@@ -7,7 +7,8 @@ import (
 )
 
 type USBCam struct {
-	Device string
+	Device     string
+	Resolution string
 }
 
 func (c *USBCam) CaptureImage() ([]byte, error) {
@@ -18,7 +19,7 @@ func (c *USBCam) CaptureImage() ([]byte, error) {
 	defer tempFile.Close()
 
 	// Использование fswebcam для захвата изображения с USB камеры
-	cmd := exec.Command("fswebcam", "-d", c.Device, "--no-banner", tempFile.Name())
+	cmd := exec.Command("fswebcam", "-d", c.Device, "-r", c.Resolution, tempFile.Name())
 	output, err := cmd.CombinedOutput()
 	if err != nil {
 		return nil, fmt.Errorf("failed to capture image: %w\nOutput: %s", err, string(output))

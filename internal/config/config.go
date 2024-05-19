@@ -11,12 +11,18 @@ type Config struct {
 	IP             string
 	Username       string
 	Password       string
+	UsbCam         UsbCamConfig
 	CameraType     string `mapstructure:"camera_type"`
 	Delay          time.Duration
 	Storage        StorageConfig
 	Telegram       TelegramConfig
 	Axis           AxisConfig
 	VideoOutputDir string `mapstructure:"video_output_dir"`
+}
+
+type UsbCamConfig struct {
+	Resolution string
+	UsbDevice  string
 }
 
 type AxisConfig struct {
