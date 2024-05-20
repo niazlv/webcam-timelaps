@@ -1,12 +1,14 @@
-ip: "your_camera_ip"
-username: "your_camera_username"
-password: "your_camera_password"
-usbcam:
-  usb_device: "/dev/video0" 
-  resolution: "640x480"
-axis:
-  resolution: "1280x1024"
-  compression: 50
+cam:
+  type: "ipcam-android"
+  ip: "your_camera_ip"
+  username: "your_camera_username"
+  password: "your_camera_password"
+  usbcam:
+    usb_device: "/dev/video0" 
+    resolution: "640x480"
+  axis:
+    resolution: "1280x1024"
+    compression: 50
 delay: 5
 storage:
   type: "local"

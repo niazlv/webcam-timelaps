@@ -10,6 +10,7 @@ import (
 	"niazlv/time-lapse/internal/telegram"
 	"os/exec"
 	"path/filepath"
+	"strings"
 	"time"
 )
 
@@ -28,15 +29,34 @@ func main() {
 	fmt.Println(delay)
 
 	// Пример использования IP камеры D-Link и локального хранилища
-	cam = &camera.USBCam{Device: cfg.UsbCam.UsbDevice, Resolution: cfg.UsbCam.Resolution} //camera.IPCamAXIS{IP: cfg.IP, Username: cfg.Username, Password: cfg.Password, Resolution: cfg.Axis.Resolution, Compression: cfg.Axis.Compression}
-	store = &storage.LocalStorage{Directory: cfg.Storage.Directory}
+	if strings.ToLower(cfg.Cam.Type) == "ipcam-android" {
+		cam = &camera.IPCamAndroidWebCam{IP: cfg.Cam.IP}
+	} else if strings.ToLower(cfg.Cam.Type) == "usb" {
+		cam = &camera.USBCam{Device: cfg.Cam.UsbCam.UsbDevice, Resolution: cfg.Cam.UsbCam.Resolution}
+	} else if strings.ToLower(cfg.Cam.Type) == "ipcam-axis" {
+		cam = &camera.IPCamAXIS{IP: cfg.Cam.IP, Username: cfg.Cam.Username, Password: cfg.Cam.Password, Resolution: cfg.Cam.Axis.Resolution, Compression: cfg.Cam.Axis.Compression}
+	} else if strings.ToLower(cfg.Cam.Type) == "ipcam-dlink" {
+		cam = &camera.IPCamDLink{IP: cfg.Cam.IP, Username: cfg.Cam.Username, Password: cfg.Cam.Password}
+	} else {
+		log.Fatal("ERROR!! Type of Camera not selected. Exit...")
+		return
+	}
+
+	if strings.ToLower(cfg.Storage.Type) == "ftp" {
+		store = &storage.FTPStorage{Server: cfg.Storage.FTP.Server, Username: cfg.Storage.FTP.Username, Password: cfg.Storage.FTP.Password}
+	} else if strings.ToLower(cfg.Storage.Type) == "local" {
+		store = &storage.LocalStorage{Directory: cfg.Storage.Directory}
+	} else {
+		log.Fatal("ERROR!! Type of Storage not selected. Exit...")
+		return
+	}
 	msg = &telegram.TelegramBot{BotToken: cfg.Telegram.BotToken, ChatID: cfg.Telegram.ChatID, Storage: store}
 	proc := &processing.Processing{Storage: store, OutputDir: cfg.VideoOutputDir}
 
 	log.Println("Starting the main loop")
 	go func() {
 		for {
-			err := captureAndSaveImage(cam, store)
+			err := captureAndSaveImage(cam, store, cfg)
 			if err != nil {
 				log.Printf("Error capturing and saving image: %v\n", err)
 			}
@@ -129,7 +149,7 @@ func main() {
 }
 
 // Функция захвата и сохранения изображения
-func captureAndSaveImage(cam camera.Camera, store storage.Storage) error {
+func captureAndSaveImage(cam camera.Camera, store storage.Storage, cfg *config.Config) error {
 	now := time.Now()
 	todayDIR := now.Format("01-02-2006")
 	todays := now.Format("15-04-05")
@@ -146,7 +166,10 @@ func captureAndSaveImage(cam camera.Camera, store storage.Storage) error {
 		log.Printf("Directory %s created\n", dirPath)
 	}
 
+	// TODO: починить захват изображения
+
 	// // Захват изображения
+	_ = cam
 	// img, err := cam.CaptureImage()
 	// if err != nil {
 	// 	return fmt.Errorf("failed to capture image: %w", err)
@@ -158,7 +181,7 @@ func captureAndSaveImage(cam camera.Camera, store storage.Storage) error {
 	// 	return fmt.Errorf("failed to save image: %w", err)
 	// }
 
-	// Захват и сразу же сохранение(в ручном режиме, ибо закалупался)
+	// Захват и сразу же сохранение(костыль, в ручном режиме, ибо закалупался)
 	cmd := exec.Command("fswebcam", "-r", "640x480", filepath.Join("/media/pi/SomeFLASH/timelapse/", filePath))
 	output, err := cmd.CombinedOutput()
 	if err != nil {

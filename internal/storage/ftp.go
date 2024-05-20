@@ -178,3 +178,25 @@ func ftpErrAlreadyExists(err error) bool {
 	// FTP server returns 550 error code if the directory already exists
 	return err != nil && strings.Contains(err.Error(), "550")
 }
+
+func (s *FTPStorage) ListFiles(dirPath string) ([]string, error) {
+	conn, err := s.connect()
+	if err != nil {
+		return nil, err
+	}
+	defer conn.Quit()
+
+	entries, err := conn.List(dirPath)
+	if err != nil {
+		return nil, fmt.Errorf("failed to list files: %w", err)
+	}
+
+	var files []string
+	for _, entry := range entries {
+		if entry.Type == ftp.EntryTypeFile {
+			files = append(files, filepath.Join(dirPath, entry.Name))
+		}
+	}
+
+	return files, nil
+}

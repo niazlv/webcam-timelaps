@@ -8,16 +8,20 @@ import (
 )
 
 type Config struct {
-	IP             string
-	Username       string
-	Password       string
-	UsbCam         UsbCamConfig
-	CameraType     string `mapstructure:"camera_type"`
+	Cam            CamConfig
 	Delay          time.Duration
 	Storage        StorageConfig
 	Telegram       TelegramConfig
-	Axis           AxisConfig
 	VideoOutputDir string `mapstructure:"video_output_dir"`
+}
+
+type CamConfig struct {
+	Type     string
+	IP       string
+	Username string
+	Password string
+	UsbCam   UsbCamConfig
+	Axis     AxisConfig
 }
 
 type UsbCamConfig struct {
