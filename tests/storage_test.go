@@ -1,11 +1,17 @@
 package tests
 
 import (
+	"log"
+	"niazlv/time-lapse/internal/config"
 	"niazlv/time-lapse/internal/storage"
 	"os"
 	"path/filepath"
 	"testing"
 )
+
+var cfg config.Config
+
+// Загрузка конфигурации
 
 func TestLocalStorage_SaveFile(t *testing.T) {
 	// Создаем временную директорию для теста
@@ -108,15 +114,19 @@ func TestLocalStorage_IsExist(t *testing.T) {
 }
 
 func TestFTPStorage_SaveFileAndReadFile(t *testing.T) {
+	cfg, err := config.LoadConfig()
+	if err != nil {
+		log.Fatalf("Failed to load configuration: %v\n", err)
+	}
 	// Создаем экземпляр LocalStorage
-	ftpStorage := &storage.FTPStorage{Server: "YOUR_FTP_SERVER", Username: "YOUR_LOGIN", Password: "YOUR_PASS"}
+	ftpStorage := &storage.FTPStorage{Server: cfg.Storage.FTP.Server, Username: cfg.Storage.FTP.Username, Password: cfg.Storage.FTP.Password}
 
 	// Данные для записи
 	dirpath := "__test_temp_dir__"
 	filePath := "testfile.txt"
 	data := []byte("Hello, World!")
 
-	err := ftpStorage.Remove(dirpath)
+	err = ftpStorage.Remove(dirpath)
 	if err != nil {
 		t.Logf("good, storage not exist(maybe). Check it self: %v", err)
 	}
