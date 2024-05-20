@@ -1,0 +1,17 @@
+services:
+  app:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile
+    ports:
+      - "8000:8000"
+    restart: unless-stopped
+    volumes:
+      - ./storage:/app-data/storage
+    environment:
+      - DATABASE_PATH=/app/storage/catalog.db
+      - UID=1000
+      - GID=1000
+
+volumes:
+  storage:
