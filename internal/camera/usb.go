@@ -24,8 +24,8 @@ func (c *USBCam) CaptureImage() ([]byte, error) {
 	cmd := exec.Command("/usr/bin/fswebcam", "-d", c.Device, "-r", c.Resolution, fileName)
 
 	// Перенаправляем стандартный вывод и стандартный вывод ошибок
-	cmd.Stdout = os.Stdout
-	cmd.Stderr = os.Stderr
+	// cmd.Stdout = os.Stdout
+	// cmd.Stderr = os.Stderr
 
 	if err := cmd.Run(); err != nil {
 		return nil, fmt.Errorf("failed to run fswebcam: %w", err)
