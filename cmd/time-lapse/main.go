@@ -182,10 +182,23 @@ func captureAndSaveImage(cam camera.Camera, store storage.Storage, cfg *config.C
 	// }
 
 	// Захват и сразу же сохранение(костыль, в ручном режиме, ибо закалупался)
-	cmd := exec.Command("fswebcam", "-r", "640x480", filepath.Join("/media/pi/SomeFLASH/timelapse/", filePath))
-	output, err := cmd.CombinedOutput()
-	if err != nil {
-		return fmt.Errorf("failed to capture image: %w\nOutput: %s", err, string(output))
+	if strings.ToLower(cfg.Storage.Type) == "local" {
+		cmd := exec.Command("fswebcam", "-r", "640x480", filepath.Join("/media/pi/SomeFLASH/timelapse/", filePath))
+		output, err := cmd.CombinedOutput()
+		if err != nil {
+			return fmt.Errorf("failed to capture image: %w\nOutput: %s", err, string(output))
+		}
+	} else {
+		img, err := cam.CaptureImage()
+		if err != nil {
+			return fmt.Errorf("failed to capture image: %w", err)
+		}
+
+		// Сохранение изображения
+		err = store.SaveFile(filePath, img)
+		if err != nil {
+			return fmt.Errorf("failed to save image: %w", err)
+		}
 	}
 
 	log.Printf("Image saved to %s\n", filePath)

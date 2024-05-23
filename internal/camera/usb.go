@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"os"
 	"os/exec"
-	"time"
 )
 
 type USBCam struct {
@@ -17,7 +16,7 @@ func (c *USBCam) CaptureImage() ([]byte, error) {
 	if err != nil {
 		return nil, fmt.Errorf("failed to create temp file: %w", err)
 	}
-	defer tempFile.Close()
+	defer os.Remove(tempFile.Name()) // Удаление временного файла после использования
 
 	// Использование fswebcam для захвата изображения с USB камеры
 	cmd := exec.Command("fswebcam", "-d", c.Device, "-r", c.Resolution, tempFile.Name())
@@ -26,21 +25,10 @@ func (c *USBCam) CaptureImage() ([]byte, error) {
 		return nil, fmt.Errorf("failed to capture image: %w\nOutput: %s", err, string(output))
 	}
 
-	var imgData []byte
-	for {
-		fileInfo, err := tempFile.Stat()
-		if err != nil {
-			return nil, fmt.Errorf("failed to get file info: %w", err)
-		}
-
-		if fileInfo.Size() > 0 {
-			imgData, err = os.ReadFile(tempFile.Name())
-			if err != nil {
-				return nil, fmt.Errorf("failed to read captured image: %w", err)
-			}
-			break
-		}
-		time.Sleep(100 * time.Millisecond) // Подождать немного и проверить снова
+	// Чтение содержимого файла после завершения команды
+	imgData, err := os.ReadFile(tempFile.Name())
+	if err != nil {
+		return nil, fmt.Errorf("failed to read captured image: %w", err)
 	}
 
 	return imgData, nil
