@@ -13,51 +13,35 @@ type USBCam struct {
 }
 
 func (c *USBCam) CaptureImage() ([]byte, error) {
-	tempFile, err := os.CreateTemp("", "usb_cam_*.jpg")
-	if err != nil {
-		return nil, fmt.Errorf("failed to create temp file: %w", err)
-	}
-	defer os.Remove(tempFile.Name()) // Удаление временного файла после использования
-	fmt.Println(tempFile.Name())
+	fileName := "usb_cam_capture.jpg"
 
-	// Использование fswebcam для захвата изображения с USB камеры
-	cmd := exec.Command("fswebcam", "-d", c.Device, "-r", c.Resolution, tempFile.Name())
-	if err := cmd.Start(); err != nil {
-		return nil, fmt.Errorf("failed to start fswebcam: %w", err)
+	// Удаляем файл, если он существует
+	if err := os.Remove(fileName); err != nil && !os.IsNotExist(err) {
+		return nil, fmt.Errorf("failed to remove existing file: %w", err)
 	}
 
-	// Установить таймаут на ожидание завершения команды
-	done := make(chan error, 1)
-	go func() {
-		done <- cmd.Wait()
-	}()
+	// Явно указываем путь к fswebcam (проверьте, что fswebcam доступен по этому пути)
+	cmd := exec.Command("/usr/bin/fswebcam", "-d", c.Device, "-r", c.Resolution, fileName)
 
-	select {
-	case <-time.After(3 * time.Second):
-		// Таймаут
-		if err := cmd.Process.Kill(); err != nil {
-			return nil, fmt.Errorf("failed to kill process after timeout: %w", err)
-		}
-		return nil, fmt.Errorf("timed out while waiting for fswebcam to finish")
-	case err := <-done:
-		// Команда завершилась
-		if err != nil {
-			output, _ := cmd.CombinedOutput()
-			return nil, fmt.Errorf("fswebcam failed: %w\nOutput: %s", err, string(output))
-		}
+	// Перенаправляем стандартный вывод и стандартный вывод ошибок
+	cmd.Stdout = os.Stdout
+	cmd.Stderr = os.Stderr
+
+	if err := cmd.Run(); err != nil {
+		return nil, fmt.Errorf("failed to run fswebcam: %w", err)
 	}
 
-	// Проверка, что файл действительно заполнен
+	// Проверка, что файл действительно заполнен с таймаутом
 	var imgData []byte
 	start := time.Now()
 	for {
-		fileInfo, err := os.Stat(tempFile.Name())
+		fileInfo, err := os.Stat(fileName)
 		if err != nil {
 			return nil, fmt.Errorf("failed to get file info: %w", err)
 		}
 
 		if fileInfo.Size() > 0 {
-			imgData, err = os.ReadFile(tempFile.Name())
+			imgData, err = os.ReadFile(fileName)
 			if err != nil {
 				return nil, fmt.Errorf("failed to read captured image: %w", err)
 			}
